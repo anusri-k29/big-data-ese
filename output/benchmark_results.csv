@@ -1,0 +1,2 @@
+kind,master,requested_rows,clean_rows,file_mb,seconds,records_per_sec,repeats,logical_cpus,ts
+data_size,spark://spark-master:7077,100000,99800,7.2,9.21,10838,1,12,2026-10-23T20:07:14.289964+00:00

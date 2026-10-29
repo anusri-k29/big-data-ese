@@ -1,0 +1,68 @@
+
+services:
+  spark-master:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: financial-analytics-spark:3.5.1
+    container_name: spark-master
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master"]
+    volumes:
+      - ./:/opt/project
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+      - "8501:8501"
+    networks:
+      - spark-net
+
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - spark-net
+
+  spark-worker-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: financial-analytics-spark:3.5.1
+    container_name: spark-worker-1
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "spark://spark-master:7077"]
+    volumes:
+      - ./:/opt/project
+    depends_on:
+      - spark-master
+    environment:
+      SPARK_WORKER_CORES: "1"
+      SPARK_WORKER_MEMORY: "1g"
+    networks:
+      - spark-net
+
+  spark-worker-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: financial-analytics-spark:3.5.1
+    container_name: spark-worker-2
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "spark://spark-master:7077"]
+    volumes:
+      - ./:/opt/project
+    depends_on:
+      - spark-master
+    environment:
+      SPARK_WORKER_CORES: "1"
+      SPARK_WORKER_MEMORY: "1g"
+    networks:
+      - spark-net
+
+networks:
+  spark-net:
+    driver: bridge
+
+volumes:
+  mongodb-data:
